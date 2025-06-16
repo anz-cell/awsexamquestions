@@ -164,10 +164,6 @@ function App() {
           questionNumber
         );
       } catch (apiError) {
-        console.warn(
-          `API failed for question ${questionNumber}, using fallback:`,
-          apiError.message
-        );
         // Use fallback question when API fails
         newQuestion = createFallbackQuestion(
           questionNumber,
@@ -182,7 +178,6 @@ function App() {
         return updated;
       });
     } catch (error) {
-      console.error(`Failed to generate question ${questionNumber}:`, error);
       // Always provide a fallback question
       const domain = awsDomains[Math.floor(Math.random() * awsDomains.length)];
       const isMultipleResponse = Math.random() < 0.5;

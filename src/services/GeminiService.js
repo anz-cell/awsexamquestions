@@ -42,7 +42,6 @@ Rules:
         questionNumber
       );
     } catch (error) {
-      console.error("Error generating question:", error);
       throw error;
     }
   }
@@ -89,25 +88,13 @@ Rules:
     if (data.candidates && data.candidates[0] && data.candidates[0].content) {
       const aiResponse = data.candidates[0].content.parts[0].text;
 
-      // Print the raw Gemini AI response to console
-      console.log("=== GEMINI AI RESPONSE ===");
-      console.log("Raw Response:", aiResponse);
-      console.log("Response Length:", aiResponse.length);
-      console.log("========================");
-
       return aiResponse;
     } else {
-      console.error("Invalid Gemini API response structure:", data);
       throw new Error("Invalid response format from Gemini API");
     }
   }
 
   parseQuestionResponse(response, domain, questionType, questionNumber) {
-    console.log(`=== PARSING QUESTION ${questionNumber} ===`);
-    console.log("Domain:", domain);
-    console.log("Type:", questionType);
-    console.log("Raw Response to Parse:", response);
-
     try {
       // Clean the response - remove markdown code blocks and extra text
       let cleanResponse = response.trim();
@@ -116,29 +103,22 @@ Rules:
       cleanResponse = cleanResponse.replace(/```json\s*/g, "");
       cleanResponse = cleanResponse.replace(/```\s*/g, "");
 
-      console.log("After markdown cleanup:", cleanResponse);
-
       // Find JSON object - look for { ... }
       const jsonStart = cleanResponse.indexOf("{");
       const jsonEnd = cleanResponse.lastIndexOf("}");
 
       if (jsonStart === -1 || jsonEnd === -1 || jsonStart >= jsonEnd) {
-        console.error("No valid JSON brackets found");
         throw new Error("No valid JSON found in response");
       }
 
       let jsonString = cleanResponse.substring(jsonStart, jsonEnd + 1);
-      console.log("Extracted JSON string:", jsonString);
 
       let questionData;
 
       // First, try parsing the original JSON without any cleaning
       try {
         questionData = JSON.parse(jsonString);
-        console.log("✅ Original JSON parsing successful:", questionData);
       } catch (originalError) {
-        console.warn("❌ Original JSON parsing failed:", originalError.message);
-
         // Only if original parsing fails, apply conservative cleaning
         const cleanedJsonString = jsonString
           // Remove trailing commas before closing braces/brackets
@@ -153,19 +133,11 @@ Rules:
           // Remove control characters that might break parsing - fixed regex
           .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "");
 
-        console.log("After conservative JSON cleaning:", cleanedJsonString);
-
         try {
           questionData = JSON.parse(cleanedJsonString);
-          console.log("✅ Cleaned JSON parsing successful:", questionData);
         } catch (cleanedError) {
           // If both fail, try manual extraction
-          console.warn(
-            "❌ Cleaned JSON parsing also failed, attempting manual extraction:",
-            cleanedError.message
-          );
           questionData = this.extractDataManually(jsonString);
-          console.log("✅ Manual extraction successful:", questionData);
         }
       }
 
@@ -216,20 +188,13 @@ Rules:
         type: questionType,
       };
 
-      console.log("✅ FINAL PARSED QUESTION:", finalQuestion);
-      console.log("=====================================");
-
       return finalQuestion;
     } catch (error) {
-      console.error("❌ Failed to parse question:", error);
-      console.log("=====================================");
       throw new Error("Failed to parse AI response");
     }
   }
 
   extractDataManually(jsonString) {
-    console.log("🔧 Starting manual extraction for:", jsonString);
-
     try {
       // Manual extraction as fallback with more robust patterns
 
@@ -288,11 +253,6 @@ Rules:
         explanationMatch = jsonString.match(pattern);
         if (explanationMatch) break;
       }
-
-      console.log("Question match:", questionMatch);
-      console.log("Options match:", optionsMatch);
-      console.log("Correct match:", correctMatch);
-      console.log("Explanation match:", explanationMatch);
 
       if (!questionMatch || !optionsMatch || !correctMatch) {
         throw new Error("Could not extract required fields manually");
@@ -362,14 +322,10 @@ Rules:
           : "No explanation provided.",
       };
 
-      console.log("✅ Manual extraction result:", result);
       return result;
     } catch (error) {
-      console.error("❌ Manual extraction failed:", error);
-
       // Ultimate fallback - create a basic question from whatever we can find
       const fallbackQuestion = this.createUltimateFallback(jsonString);
-      console.log("🆘 Using ultimate fallback:", fallbackQuestion);
       return fallbackQuestion;
     }
   }

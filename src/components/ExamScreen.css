@@ -1,0 +1,48 @@
+.exam-screen {
+  min-height: calc(100vh - 80px);
+}
+
+.loading-question {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  color: #666;
+  text-align: center;
+}
+
+.loading-question .spinner {
+  margin-bottom: 20px;
+}
+
+.loading-question p {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #ff6b35;
+}
+
+.loading-question small {
+  font-size: 0.9rem;
+  color: #888;
+}
+
+/* Mobile Layout Override */
+@media (max-width: 1200px) {
+  .exam-layout {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto 1fr !important;
+  }
+
+  .exam-sidebar {
+    order: -1 !important;
+    border-left: none !important;
+    border-bottom: 1px solid #e0e0e0 !important;
+    max-height: 200px !important;
+  }
+
+  .exam-content {
+    padding: 20px !important;
+  }
+}

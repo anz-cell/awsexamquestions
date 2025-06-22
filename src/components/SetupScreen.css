@@ -7,9 +7,11 @@
 }
 
 .setup-container {
-  max-width: 700px;
   width: 100%;
+  max-width: none;
   text-align: center;
+  padding: 0 40px;
+  box-sizing: border-box;
 }
 
 .setup-header h2 {
@@ -178,5 +180,11 @@
     width: 100%;
     font-size: 18px;
     padding: 15px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .setup-container {
+    padding: 0 20px;
   }
 }

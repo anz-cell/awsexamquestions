@@ -4,8 +4,11 @@
 }
 
 .review-container {
-  max-width: 1000px;
+  width: 100%;
+  max-width: none;
   margin: 0 auto;
+  padding: 0 40px;
+  box-sizing: border-box;
 }
 
 .review-header {
@@ -270,5 +273,11 @@
 
   .review-explanation {
     padding: 15px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .review-container {
+    padding: 0 20px;
   }
 }

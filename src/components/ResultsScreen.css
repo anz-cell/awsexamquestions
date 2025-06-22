@@ -4,8 +4,11 @@
 }
 
 .results-container {
-  max-width: 900px;
+  width: 100%;
+  max-width: none;
   margin: 0 auto;
+  padding: 0 40px;
+  box-sizing: border-box;
 }
 
 .results-header {
@@ -151,9 +154,10 @@
 }
 
 .domain-info {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto;
   align-items: center;
+  gap: 12px;
   margin-bottom: 10px;
 }
 
@@ -166,6 +170,8 @@
 .domain-score {
   font-weight: bold;
   font-size: 1.1rem;
+  white-space: nowrap;
+  text-align: right;
 }
 
 .domain-score.pass {
@@ -283,4 +289,26 @@
   .retake-btn {
     width: 100%;
   }
+}
+
+@media (max-width: 1024px) {
+  .results-container {
+    padding: 0 20px;
+  }
+}
+
+/* Progress Section */
+.progress-section {
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 15px;
+  margin-bottom: 40px;
+  border: 1px solid #e0e0e0;
+}
+
+.progress-section h3 {
+  color: #ff6b35;
+  margin-bottom: 25px;
+  text-align: center;
+  font-size: 1.5rem;
 }

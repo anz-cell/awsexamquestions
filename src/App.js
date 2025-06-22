@@ -7,8 +7,55 @@ import ResultsScreen from "./components/ResultsScreen";
 import ReviewScreen from "./components/ReviewScreen";
 import { GeminiService } from "./services/GeminiService";
 
-const EXAM_DURATION = 130 * 60; // 130 minutes in seconds
+const EXAM_DURATION = 90 * 60; // 90 minutes (1h30m) in seconds
 const EMBEDDED_API_KEY = "AIzaSyDPX7Dx1_JlZ-EJpbCM-i5aTAzWDY9h0Us";
+
+//==[ADD]: Domain weightings and helper to generate weighted domain sequence==
+const DOMAIN_WEIGHTS = {
+  "Design Secure Applications and Architectures": 0.3, // Domain 1
+  "Design Resilient Architectures": 0.26, // Domain 2
+  "Design High-Performing Architectures": 0.24, // Domain 3
+  "Design Cost-Optimized Architectures": 0.2, // Domain 4
+};
+
+function generateDomainSequence(totalQuestions = 65) {
+  const entries = Object.entries(DOMAIN_WEIGHTS);
+  // Calculate base counts and remainders for each domain
+  const baseCounts = entries.map(([domain, weight]) => {
+    const exact = weight * totalQuestions;
+    return { domain, count: Math.floor(exact), remainder: exact % 1 };
+  });
+
+  let allocated = baseCounts.reduce((sum, obj) => sum + obj.count, 0);
+
+  // Distribute remaining slots based on largest fractional parts
+  const sortedByRemainder = [...baseCounts].sort(
+    (a, b) => b.remainder - a.remainder
+  );
+  let idx = 0;
+  while (allocated < totalQuestions) {
+    sortedByRemainder[idx % sortedByRemainder.length].count += 1;
+    allocated += 1;
+    idx += 1;
+  }
+
+  // Build sequence array
+  let sequence = [];
+  baseCounts.forEach(({ domain, count }) => {
+    for (let i = 0; i < count; i++) {
+      sequence.push(domain);
+    }
+  });
+
+  // Shuffle sequence to randomize order
+  for (let i = sequence.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [sequence[i], sequence[j]] = [sequence[j], sequence[i]];
+  }
+
+  return sequence;
+}
+//==[END ADD]==
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState("setup");
@@ -20,7 +67,12 @@ function App() {
   const [examStartTime, setExamStartTime] = useState(null);
   const [examEndTime, setExamEndTime] = useState(null);
   const [results, setResults] = useState(null);
+  const [history, setHistory] = useState(() => {
+    const stored = localStorage.getItem("awsExamHistory");
+    return stored ? JSON.parse(stored) : [];
+  });
   const [isGeneratingQuestion, setIsGeneratingQuestion] = useState(false);
+  const [domainSequence, setDomainSequence] = useState([]);
 
   // Initialize Gemini service
   const geminiService = new GeminiService(EMBEDDED_API_KEY);
@@ -117,6 +169,21 @@ function App() {
     setCurrentScreen("results");
   }, [calculateResults]);
 
+  // Save each completed exam result to history & localStorage
+  useEffect(() => {
+    if (results) {
+      const entry = {
+        date: new Date().toISOString(),
+        score: results.percentage,
+      };
+      setHistory((prev) => {
+        const updated = [...prev, entry];
+        localStorage.setItem("awsExamHistory", JSON.stringify(updated));
+        return updated;
+      });
+    }
+  }, [results]);
+
   // Timer effect
   useEffect(() => {
     let interval = null;
@@ -145,15 +212,23 @@ function App() {
     setFlagged(new Set());
     setQuestions([]);
 
-    // Generate the first question
-    await generateNextQuestion(1);
+    // Generate the weighted domain sequence for this exam session
+    const sequence = generateDomainSequence(65);
+    setDomainSequence(sequence);
+
+    // Generate the first question using the predetermined domain
+    await generateNextQuestion(1, sequence);
   };
 
-  const generateNextQuestion = async (questionNumber) => {
+  const generateNextQuestion = async (questionNumber, sequenceParam) => {
     setIsGeneratingQuestion(true);
 
+    const seq = sequenceParam || domainSequence;
+
     try {
-      const domain = awsDomains[Math.floor(Math.random() * awsDomains.length)];
+      const domain =
+        (seq && seq[questionNumber - 1]) ??
+        awsDomains[Math.floor(Math.random() * awsDomains.length)];
       const isMultipleResponse = Math.random() < 0.5;
 
       let newQuestion;
@@ -203,6 +278,35 @@ function App() {
     isMultipleResponse
   ) => {
     const fallbackQuestions = {
+      "Design Secure Architectures": [
+        {
+          question:
+            "Which AWS services provide network-level security for your VPC? (Select all that apply)",
+          options: [
+            "Security Groups",
+            "Network ACLs",
+            "AWS WAF",
+            "AWS Shield",
+            "VPC Flow Logs",
+          ],
+          correct: isMultipleResponse ? [0, 1] : [1],
+          explanation:
+            "Network ACLs provide subnet-level security, while Security Groups provide instance-level security. Both are essential for VPC network security.",
+        },
+        {
+          question:
+            "What is the best practice for storing sensitive configuration data in AWS?",
+          options: [
+            "Environment variables",
+            "AWS Systems Manager Parameter Store",
+            "Hard-coded in application",
+            "S3 bucket",
+          ],
+          correct: [1],
+          explanation:
+            "AWS Systems Manager Parameter Store provides secure, hierarchical storage for configuration data and secrets.",
+        },
+      ],
       "Design Secure Applications and Architectures": [
         {
           question:
@@ -464,6 +568,7 @@ function App() {
       {currentScreen === "results" && (
         <ResultsScreen
           results={results}
+          history={history}
           onShowReview={showReview}
           onRetakeExam={resetExam}
         />

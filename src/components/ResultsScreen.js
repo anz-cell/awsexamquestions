@@ -1,7 +1,13 @@
 import React from "react";
 import "./ResultsScreen.css";
+import ProgressGraph from "./ProgressGraph";
 
-const ResultsScreen = ({ results, onShowReview, onRetakeExam }) => {
+const ResultsScreen = ({
+  results,
+  history = [],
+  onShowReview,
+  onRetakeExam,
+}) => {
   if (!results) {
     return (
       <div className="results-screen">
@@ -110,6 +116,13 @@ const ResultsScreen = ({ results, onShowReview, onRetakeExam }) => {
             })}
           </div>
         </div>
+
+        {history.length > 1 && (
+          <div className="progress-section">
+            <h3>📈 Your Progress</h3>
+            <ProgressGraph history={history} />
+          </div>
+        )}
 
         <div className="results-actions">
           <button onClick={onShowReview} className="btn btn-primary review-btn">

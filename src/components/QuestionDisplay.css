@@ -1,7 +1,9 @@
 .question-display {
   padding: 40px;
-  max-width: 900px;
   margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
 }
 
 .question-header {
@@ -22,7 +24,7 @@
 .question-number {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #FF6B35;
+  color: #ff6b35;
 }
 
 .question-type {
@@ -91,14 +93,14 @@
 }
 
 .option:hover {
-  border-color: #FF6B35;
+  border-color: #ff6b35;
   background: #fff;
   transform: translateX(5px);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .option.selected {
-  border-color: #FF6B35;
+  border-color: #ff6b35;
   background: #fff5f2;
   box-shadow: 0 4px 15px rgba(255, 107, 53, 0.2);
 }
@@ -119,7 +121,7 @@
 
 .option-letter {
   font-weight: 700;
-  color: #FF6B35;
+  color: #ff6b35;
   margin-right: 15px;
   min-width: 25px;
 }
@@ -155,7 +157,7 @@
   width: 16px;
   height: 16px;
   border: 2px solid #f3f3f3;
-  border-top: 2px solid #FF6B35;
+  border-top: 2px solid #ff6b35;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   display: inline-block;
@@ -163,58 +165,60 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Mobile Responsiveness */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .question-display {
     padding: 20px;
   }
-  
+}
+
+@media (max-width: 768px) {
   .question-header {
     flex-direction: column;
     gap: 15px;
     align-items: stretch;
   }
-  
+
   .question-number {
     font-size: 1.3rem;
   }
-  
+
   .question-text {
     font-size: 1.1rem;
   }
-  
+
   .option {
     padding: 15px;
   }
-  
+
   .option-letter {
     min-width: 20px;
     margin-right: 10px;
   }
-  
+
   .navigation-buttons {
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .navigation-buttons .btn {
     width: 100%;
   }
 }
 
 @media (max-width: 480px) {
-  .question-display {
-    padding: 15px;
-  }
-  
   .option {
     padding: 12px;
   }
-  
+
   .option-input {
     transform: scale(1.1);
   }
